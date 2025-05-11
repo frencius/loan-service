@@ -38,6 +38,21 @@ A system that handles:
 
 
 ## Analysis and Design
+### Requirement Analysis
+1. One way Loan state machine: proposed -> approved -> invested -> disbursed
+2. each state has required data and validations
+3. Investor and loan has many to many relationship
+
+### Requirement Assumption
+1. If the proposed loan is not eligible, reject Loan -> rejected
+2. Once Loan approved, user/ Amartha cancels Loan -> canceled
+3. Once Loan published to investor -> offered
+4. Once Loan published but did not get invested -> canceled
+5. positif flow of state proposed -> approved -> offered -> invested -> disbursed
+
+state diagram:
+
+### Data Model
 Entity/ object:
 1. Loan
     properties:
@@ -53,19 +68,21 @@ Entity/ object:
         - validator_id (uuid, input)
         - validated_at (timestamptz, input)
 
-        - approved_at
-        - approved_by
-        - rejected_at
-        - rejected_by
-        - rejected_reason
+        - approved_at (timestamptz, system generated)
+        - approved_by (uuid, logged in user_id)
+        - rejected_at (timestamptz, system generated)
+        - rejected_by (uuid, logged in user_id)
+        - rejected_reason (text, input)
 
         - invested_amount
         - loan_agreement_letter_url
         - is_loan_aggrement_signed
-        
 
         - disburse_by
         - disburse_at
+
+        - publish_at
+        - publish_by
     methods:
         - createLoan()
         - updateLoan()
@@ -88,6 +105,8 @@ Entity/ object:
                 - 400 Bad Request
                 - 401 Unauthorized
                 - 500 Internal Server Error
+            validations:
+                - basic validation (empty, etc)
         PUT /v1/loans/{id}
             requestBody:
                 - borrower_id
@@ -104,7 +123,7 @@ Entity/ object:
                 - 500 Internal Server Error
         GET /v1/loans/{id}
             response:
-                -
+                - [all loan properties + investment]
         POST /v1/files
             - requestBody:
                 - byte file
@@ -114,36 +133,38 @@ Entity/ object:
 
         POST /v1/loans/{id}/approvals
             requestBody:
-                - approved_at
-                - approve_by
-                - rejected_at
-                - rejected_by
                 - rejected_reason
-                - state
-
+                - state: approve | reject
             response:
                 -
-
-
+            validation:
+                - state must be proposed state
+                - visit_proof_url, validator_id, and validated_at are not empty
+        
+        PATCH /v1/loan/{id}/publish
+            requestBody:
+                - state: offered
+            response:
+                -
+            validation:
+                -
 
 2. Investment
     properties:
+        - id
+        - investor_id
+        - loan_id
+        - invested_amount
         - investment_agreement_letter_url
         - is_investment_aggrement_signed
-        - 
+        - total_profit
+        - roi_percentage
+        - signed_at
     methods:
         - createInvestment()
-            - id
-            - investor_id
-            - loan_id
-            - invested_amount
         - generateAgreement()
-            - total_profit
-            - roi_percentage
         - sendAgreement()
-            - 
         - signAgreement()
-            - signed_at
 
 3. Employee
     properties:
@@ -151,29 +172,21 @@ Entity/ object:
         - name
         - employee_number
 
-Borrower
-Id
-Name
-Address
-Occupation
-Nik
-Dob
+4. Borrower
+    properties
+        - id
+        - name
+        - address
+        - occupation
+        - nik
+        - dob
 
-Create loan
-
-Approve loan
-
-Validator employee id
-
-
-
-
-
-Investor
-Id
-Name
-Nik
-Npwp
+5. Investor
+    properties:
+        - id
+        - name
+        - nik
+        - npwp
 
 
 assumptions:
