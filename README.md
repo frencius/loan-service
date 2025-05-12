@@ -44,110 +44,58 @@ A system that handles:
 3. Investor and loan has many to many relationship
 
 ### Requirement Assumption
-1. If the proposed loan is not eligible, reject Loan -> rejected
-2. Once Loan approved, user/ Amartha cancels Loan -> canceled
-3. Once Loan published to investor -> offered
-4. Once Loan published but did not get invested -> canceled
-5. positif flow of state proposed -> approved -> offered -> invested -> disbursed
+1. loan state can be seen from borrower and staff POV
+2. added new canceled state for handling cancellations
+3. added new rejected state if loan could not be approved
+4. added new published state for when the loan is offered to intestors/ lenders
+5. when published to investors/ lenders and got no investment, loan is canceled
+6. invested state is when total_invested_amount == principal_amount
 
-state diagram:
+### state diagram:
+[Loan State Machine](state-diagram.png)
 
-### Data Model
+### Data Model Design
 Entity/ object:
 1. Loan
     properties:
-        - id (uuid, system generated)
-        - borrower_id (uuid, input)
-        - principal_amount (numeric, input)
-        - interest_rate (numeric, input)
-        - state (state enum: proposed , approved, offered, invested, disbursed, rejected, canceled - system generated)
-        - created_at (timestamptz, system generated)
-        - created_by (uuid, logged in user_id)
-
-        - visit_proof_url (text, blob store url)
-        - validator_id (uuid, input)
-        - validated_at (timestamptz, input)
-
-        - approved_at (timestamptz, system generated)
-        - approved_by (uuid, logged in user_id)
-        - rejected_at (timestamptz, system generated)
-        - rejected_by (uuid, logged in user_id)
-        - rejected_reason (text, input)
-
-        - invested_amount
+        - id
+        - borrower_id
+        - principal_amount
+        - total_invested_amount
+        - interest_rate
+        - roi_rate
+        - state
+        - visit_proof_url
+        - validated_at 
+        - validated_by 
         - loan_agreement_letter_url
         - is_loan_aggrement_signed
-
-        - disburse_by
-        - disburse_at
-
-        - publish_at
-        - publish_by
+        - loan_aggrement_signed_at
+        --audit--
+        - created_at
+        - created_by
+        - approved_at
+        - approved_by        
+        - rejected_at
+        - rejected_by
+        - rejected_reason
+        - canceled_at
+        - canceled_by
+        - canceled_reason
+        - published_at
+        - published_by
+        - invested_at
+        - disbursed_at
+        - disbursed_by
     methods:
         - createLoan()
         - updateLoan()
         - getLoan()
+        - rejectLoan()
+        - cancelLoan()
         - approveLoan()
         - publishLoan()
         - disburseLoan()
-    apis:
-        POST /v1/loans
-            requestBody:
-                - borrower_id
-                - principal_amount
-                - interest_rate
-                - visit_proof_url
-                - validator_id
-                - validated_at
-            response:
-                - 201 Created
-                - 404 Not Found
-                - 400 Bad Request
-                - 401 Unauthorized
-                - 500 Internal Server Error
-            validations:
-                - basic validation (empty, etc)
-        PUT /v1/loans/{id}
-            requestBody:
-                - borrower_id
-                - principal_amount
-                - interest_rate
-                - visit_proof_url
-                - validator_id
-                - validated_at
-            response:
-                - 200 Success
-                - 404 Not Found
-                - 400 Bad Request
-                - 401 Unauthorized
-                - 500 Internal Server Error
-        GET /v1/loans/{id}
-            response:
-                - [all loan properties + investment]
-        POST /v1/files
-            - requestBody:
-                - byte file
-            response:
-                - id
-                - url
-
-        POST /v1/loans/{id}/approvals
-            requestBody:
-                - rejected_reason
-                - state: approve | reject
-            response:
-                -
-            validation:
-                - state must be proposed state
-                - visit_proof_url, validator_id, and validated_at are not empty
-        
-        PATCH /v1/loan/{id}/publish
-            requestBody:
-                - state: offered
-            response:
-                -
-            validation:
-                -
 
 2. Investment
     properties:
@@ -157,22 +105,29 @@ Entity/ object:
         - invested_amount
         - investment_agreement_letter_url
         - is_investment_aggrement_signed
+        - investment_aggrement_signed_at
         - total_profit
-        - roi_percentage
-        - signed_at
     methods:
-        - createInvestment()
+        - investLoan()
         - generateAgreement()
         - sendAgreement()
-        - signAgreement()
 
-3. Employee
+3. Investor
+    properties:
+        - id
+        - name
+        - nik
+        - npwp
+        - email
+        - phone_number
+
+4. Employee
     properties:
         - id
         - name
         - employee_number
 
-4. Borrower
+5. Borrower
     properties
         - id
         - name
@@ -181,18 +136,122 @@ Entity/ object:
         - nik
         - dob
 
-5. Investor
-    properties:
-        - id
-        - name
-        - nik
-        - npwp
+### API Design
+    API:
+        POST /v1/loans
+            requestBody:
+                - borrower_id
+                - principal_amount
+                - interest_rate
+                - roi_rate
+                - visit_proof_url
+                - validated_at 
+                - validated_by 
+            response:
+                - 201 Created:
+                    - loan_id
+                    - state: proposed
+                - 404 Not Found
+                - 400 Bad Request
+                - 401 Unauthorized
+                - 500 Internal Server Error
+            validations:
+                - borrower_id is exist
+                - principal_amount is not empty
+                - interest_rate is not empty
+                - roi_rate is not empty
+        PUT /v1/loans/{id}
+            requestBody:
+                - borrower_id
+                - principal_amount
+                - interest_rate
+                - roi_rate
+                - visit_proof_url
+                - validated_at 
+                - validated_by 
+                - loan_agreement_letter_url
+                - is_loan_aggrement_signed
+                - loan_aggrement_signed_at
+            response:
+                - 200 Success
+                - 404 Not Found
+                - 400 Bad Request
+                - 401 Unauthorized
+                - 500 Internal Server Error
+            validations:
+                - loan id is exist
+                - borrower_id is exist
+                - basic validation (empty, number, string)
+        
+        GET /v1/loans/{id}
+            response:
+                - 200 Success:
+                    - [all loan properties]
+                - 404 Not Found
+                - 400 Bad Request
+                - 401 Unauthorized
+                - 500 Internal Server Error
+            validations:
+                - loan id is exist
+        
+        PATCH /v1/loans/{id}
+            requestBody:
+                - state: canceled | rejected | approved | publihsed | invested | disbursed 
+            response:
+                - 200 Success
+                - 404 Not Found
+                - 400 Bad Request
+                - 401 Unauthorized
+                - 500 Internal Server Error
+            validations:
+                - loan id id exist
+                - current state: proposed, eligible state [rejected, canceled, approved]
+                - current state: approved, eligible state [canceled, published]
+                - current state published, eligible state [canceled, invested]
+                - current state invested, eligible state [canceled, disbursed]
+                - current state disbursed, eligible state [canceled]
+                - approved:
+                    - current state is proposed
+                    - visit_proof_url is not empty
+                    - validated_at is not empty
+                    - validated_by is not empty
+                - published:
+                    - current state is approved
+                - disbursed:
+                    - current state is invested
+                    - loan_agreement_letter_url is not empty
+                    - is_loan_aggrement_signed is not empty
+                    - loan_aggrement_signed_at is not empty
+                    - disbursed_at is not empty
+                    - disbursed_by is not empty
 
+        POST /v1/loans/{id}/investments
+            requestBody:
+                - investor_id
+                - invested_amount
+            response:
+                - 201 Created:
+                    - investment_id
+                - 404 Not Found
+                - 400 Bad Request
+                - 401 Unauthorized
+                - 500 Internal Server Error
+            validations:
+                - investor_id is exist
+                - loan_id is exist
+                - invested_amount is not empty
+            logic:
+                - increment total_invested_amount in Loan for every investment creation
+                - if (total_invested_amount == principal_amount && current state == published) then change loan state to invested
+                - once invested, generate agreement letter:
+                    - this could be built internally or using 3rd party integration like Privy, DocuSign, MekariSign, etc
+                    - investor: include roi
+                    - borrower: include interest_rate
+                - send aggreement letter url to investors email
 
-assumptions:
-1. once approved it can not go back to proposed state. - Where can go if loan cancelled by borrower? I assume to cancelled state
-2. the employee id of the field officer that hands the money and/or collect the agreement letter and the employee id of field validator - is one employee
-
-to think:
-1. once approved loan is ready to be offered to investors/lender
-2. create state machine?
+        POST /v1/files
+            - requestBody:
+                - byte file
+            response:
+                - id
+                - url

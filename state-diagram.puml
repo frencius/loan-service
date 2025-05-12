@@ -1,0 +1,31 @@
+@startuml
+
+[*] --> proposed: createLoan()
+proposed: initial state
+
+proposed -left-> rejected: rejectLoan()
+rejected: rejected by staff
+
+proposed -down-> canceled: cancelLoan()
+canceled: canceled by borrower or staff\nor did not get invested
+
+proposed -> approved: approveLoan()
+approved -down-> canceled: cancelLoan()
+approved: approved by staff
+
+
+approved -> published: publishLoan()
+published -down-> canceled: cancelLoan()
+published: offered to investors
+
+published -> invested: investLoan()
+invested -down-> canceled: cancelLoan()
+invested: invested by investors
+
+invested -> disbursed: disburseLoan()
+disbursed -down-> canceled: cancelLoan()
+disbursed: loan disbursed to borrower
+
+
+disbursed --> [*]
+@enduml
