@@ -1,0 +1,113 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Loan Service
+  license:
+    name: MIT
+servers:
+  - url: http://localhost
+tags:
+  - name: General
+paths:
+  /health-checks:
+    get:
+      summary: a health check api to test system availability
+      operationId: health-checks
+      tags:
+        - General
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "500":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+ 
+components:
+  schemas:
+    SuccessResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: OK
+    BadRequestResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Bad Request
+        error:
+          type: object
+          properties:
+            detail:
+              type: string
+              example: json decode failed
+            message:
+              type: string
+              example: Request format invalid
+    NotFoundResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: Not Found
+        error:
+          type: object
+          properties:
+            detail:
+              type: string
+              example: Not Found
+            message:
+              type: string
+              example: Data tidak ditemukan
+    UnauthorizedResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 401
+        message:
+          type: string
+          example: Unauthorized
+        error:
+          type: object
+          properties:
+            detail:
+              type: string
+              example: unauthorized request
+            message:
+              type: string
+              example: Tidak memiliki permission
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        message:
+          type: string
+          example: Internal System Error
+        error:
+          type: object
+          properties:
+            detail:
+              type: string
+              example: pq error
+            message:
+              type: string
+              example: Something wrong in the system
