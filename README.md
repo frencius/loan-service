@@ -148,9 +148,6 @@ Entity/ object:
                 - principal_amount
                 - interest_rate
                 - roi_rate
-                - visit_proof_url
-                - validated_at 
-                - validated_by 
             response:
                 - 201 Created:
                     - loan_id
@@ -186,7 +183,6 @@ Entity/ object:
                 - loan id is exist
                 - borrower_id is exist
                 - basic validation (empty, number, string)
-        
         GET /v1/loans/{id}
             response:
                 - 200 Success:
@@ -197,10 +193,9 @@ Entity/ object:
                 - 500 Internal Server Error
             validations:
                 - loan id is exist
-        
         PATCH /v1/loans/{id}
             requestBody:
-                - state: canceled | rejected | approved | publihsed | invested | disbursed 
+                - state: canceled | rejected | proposed | approved | published | invested | disbursed 
             response:
                 - 200 Success
                 - 404 Not Found
@@ -228,7 +223,6 @@ Entity/ object:
                     - loan_aggrement_signed_at is not empty
                     - disbursed_at is not empty
                     - disbursed_by is not empty
-
         POST /v1/loans/{id}/investments
             requestBody:
                 - investor_id
@@ -252,7 +246,6 @@ Entity/ object:
                     - investor: include roi_rate
                     - borrower: include interest_rate
                 - send aggreement letter url to investors email
-
         POST /v1/files
             - requestBody:
                 - byte file

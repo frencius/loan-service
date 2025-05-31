@@ -33,5 +33,4 @@ func (hcr *HealthCheckRepository) Ping() (ping *model.Ping, err error) {
 	ping.ServiceStatus = "OK"
 
 	return
-
 }
