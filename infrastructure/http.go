@@ -68,12 +68,13 @@ func setupRouter(app *application.App) *chi.Mux {
 	router := chi.NewRouter()
 
 	healthCheckController := controller.NewHealthCheckController(app)
+	loanController := controller.NewLoanController(app)
 
 	// middleware
 	router.Use(CORS)
 	router.Get("/health-checks", healthCheckController.Ping)
 	router.Route("/v1", func(r chi.Router) {
-
+		r.Post("/loans", loanController.CreateLoan)
 	})
 
 	return router

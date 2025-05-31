@@ -1,3 +1,7 @@
 package model
 
-var ()
+import "errors"
+
+var (
+	ErrorBorrowerNotFound = errors.New("borrower is not found")
+)
