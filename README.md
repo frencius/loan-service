@@ -204,13 +204,14 @@ Entity/ object:
                 - 500 Internal Server Error
             validations:
                 - loan id id exist
+                - loan state is valid
                 - current state: proposed, eligible state [rejected, canceled, approved]
                 - current state: approved, eligible state [canceled, published]
                 - current state published, eligible state [canceled, invested]
                 - current state invested, eligible state [canceled, disbursed]
                 - current state disbursed, eligible state [canceled]
                 - approved:
-                    - current state is proposed
+                    - current_state is proposed
                     - visit_proof_url is not empty
                     - validated_at is not empty
                     - validated_by is not empty
@@ -223,6 +224,10 @@ Entity/ object:
                     - loan_aggrement_signed_at is not empty
                     - disbursed_at is not empty
                     - disbursed_by is not empty
+                - rejected
+                    rejected reason 
+                - canceled
+                    - canceled reason
         POST /v1/loans/{id}/investments
             requestBody:
                 - investor_id
@@ -239,7 +244,8 @@ Entity/ object:
                 - loan_id is exist
                 - invested_amount is not empty
             logic:
-                - increment total_invested_amount in Loan for every investment creation
+                - create investment data
+                - increment total_invested_amount in Loan for every investment creation - update total investment amount
                 - if (total_invested_amount == principal_amount && current state == published) then change loan state to invested
                 - once invested, generate agreement letter:
                     - this could be built internally or using 3rd party integration like Privy, DocuSign, MekariSign, etc

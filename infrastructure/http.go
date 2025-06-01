@@ -74,7 +74,11 @@ func setupRouter(app *application.App) *chi.Mux {
 	router.Use(CORS)
 	router.Get("/health-checks", healthCheckController.Ping)
 	router.Route("/v1", func(r chi.Router) {
+		r.Use(AuthMiddleware)
 		r.Post("/loans", loanController.CreateLoan)
+		r.Patch("/loans/{id}", loanController.UpdateLoanState)
+		r.Post("/loans/{id}/investments", loanController.CreateLoanInvestment)
+
 	})
 
 	return router

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/frencius/loan-service/application"
 	"github.com/frencius/loan-service/model"
@@ -48,9 +49,12 @@ func (acr *BorrowerRepository) GetBorrowerByID(ctx context.Context, id string) (
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			log.Println("GetBorrowerByID ", err)
 			err = model.ErrorBorrowerNotFound
 			return
 		}
+
+		log.Println("GetBorrowerByID ", err)
 		return
 	}
 

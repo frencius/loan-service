@@ -49,3 +49,46 @@ func (mr *MockILoanRepositoryMockRecorder) CreateLoan(ctx, loan interface{}) *go
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateLoan", reflect.TypeOf((*MockILoanRepository)(nil).CreateLoan), ctx, loan)
 }
+
+// GetLoanByID mocks base method.
+func (m *MockILoanRepository) GetLoanByID(ctx context.Context, id string) (*model.Loan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLoanByID", ctx, id)
+	ret0, _ := ret[0].(*model.Loan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLoanByID indicates an expected call of GetLoanByID.
+func (mr *MockILoanRepositoryMockRecorder) GetLoanByID(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLoanByID", reflect.TypeOf((*MockILoanRepository)(nil).GetLoanByID), ctx, id)
+}
+
+// UpdateLoanState mocks base method.
+func (m *MockILoanRepository) UpdateLoanState(ctx context.Context, loan *model.Loan, newLoanState model.LoanState) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateLoanState", ctx, loan, newLoanState)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateLoanState indicates an expected call of UpdateLoanState.
+func (mr *MockILoanRepositoryMockRecorder) UpdateLoanState(ctx, loan, newLoanState interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateLoanState", reflect.TypeOf((*MockILoanRepository)(nil).UpdateLoanState), ctx, loan, newLoanState)
+}
+
+// UpdateLoanTotalInvestedAmount mocks base method.
+func (m *MockILoanRepository) UpdateLoanTotalInvestedAmount(ctx context.Context, loan *model.Loan) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateLoanTotalInvestedAmount", ctx, loan)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateLoanTotalInvestedAmount indicates an expected call of UpdateLoanTotalInvestedAmount.
+func (mr *MockILoanRepositoryMockRecorder) UpdateLoanTotalInvestedAmount(ctx, loan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateLoanTotalInvestedAmount", reflect.TypeOf((*MockILoanRepository)(nil).UpdateLoanTotalInvestedAmount), ctx, loan)
+}

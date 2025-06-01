@@ -14,6 +14,25 @@ const (
 	LoanStateDisbursed LoanState = "disbursed"
 )
 
+var ValidStateTransitions = map[LoanState][]LoanState{
+	LoanStateProposed:  {LoanStateRejected, LoanStateCanceled, LoanStateApproved},
+	LoanStateApproved:  {LoanStateCanceled, LoanStatePublished},
+	LoanStatePublished: {LoanStateCanceled, LoanStateInvested},
+	LoanStateInvested:  {LoanStateCanceled, LoanStateDisbursed},
+	LoanStateDisbursed: {LoanStateCanceled},
+	LoanStateCanceled:  {LoanStateProposed, LoanStateApproved, LoanStatePublished, LoanStateInvested, LoanStateDisbursed},
+	LoanStateRejected:  {LoanStateProposed},
+}
+
+var StateUpdates = map[LoanState][]string{
+	LoanStateApproved:  {"state", "approved_at", "approved_by"},
+	LoanStateRejected:  {"state", "rejected_at", "rejected_by"},
+	LoanStateCanceled:  {"state", "canceled_at", "canceled_by"},
+	LoanStatePublished: {"state", "published_at", "published_by"},
+	LoanStateInvested:  {"state", "invested_at"},
+	LoanStateDisbursed: {"state"},
+}
+
 var (
 	ValidLoanState = map[LoanState]bool{
 		LoanStateCanceled:  true,
@@ -73,5 +92,25 @@ type (
 	CreateLoanResponse struct {
 		LoanID string `json:"loan_id"`
 		State  string `json:"state"`
+	}
+
+	UpdateLoanStateRequest struct {
+		LoanID string
+		State  string `json:"state" validate:"required"`
+	}
+
+	UpdateLoanStateResponse struct {
+		LoanID string `json:"loan_id"`
+		State  string `json:"state"`
+	}
+
+	CreateLoanInvestmentRequest struct {
+		LoanID           string
+		InvestorID       string  `json:"investor_id" validate:"required"`
+		InvestmentAmount float64 `json:"investment_amount" validate:"required"`
+	}
+
+	CreateLoanInvestmentResponse struct {
+		InvestmentID string `json:"investment_id"`
 	}
 )
