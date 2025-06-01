@@ -44,21 +44,22 @@ $ migrate create -ext sql -dir ./db/migrations -seq {your_migration_file_name}
 ## Analysis and Design
 ### Requirement Analysis
 1. One way Loan state machine: proposed -> approved -> invested -> disbursed
-2. each state has required data and validations
+2. Each state has required data and validations
 3. Investor and loan has many to many relationship
 
 ### Requirement Assumption
-1. loan state can be seen from borrower and staff POV
-2. added new canceled state for handling cancellations
-3. added new rejected state if loan could not be approved
-4. added new published state for when the loan is offered to intestors/ lenders
-5. when published to investors/ lenders and got no investment, loan is canceled
-6. invested state is when total_invested_amount == principal_amount
+1. Loan state can be seen from borrower and staff POV
+2. Added new `canceled` state for handling cancellations
+3. Added new `rejected` state if loan could not be approved
+4. Added new `published` state for when the loan is offered to intestors/ lenders
+5. When published to investors/ lenders and got no investment, loan is canceled
+6. Invested state is when total_invested_amount >= principal_amount
 
-### state diagram:
+### State diagram:
 [Loan State Machine](docs/state-diagram.png)
 
 ### Data Model Design
+```
 Entity/ object:
 1. Loan
     properties:
@@ -139,8 +140,10 @@ Entity/ object:
         - occupation
         - nik
         - dob
+```
 
 ### API Design
+```
     API:
         POST /v1/loans
             requestBody:
@@ -243,6 +246,7 @@ Entity/ object:
                 - investor_id is exist
                 - loan_id is exist
                 - invested_amount is not empty
+                - investment exist
             logic:
                 - create investment data
                 - increment total_invested_amount in Loan for every investment creation - update total investment amount
@@ -258,3 +262,4 @@ Entity/ object:
             response:
                 - id
                 - url
+```
